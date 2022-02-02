@@ -131,6 +131,21 @@ void write_to_file(char* file_name,
 
 /* ============================================ */
 
+size_t get_parent_index(size_t i) {
+    return i/2;
+}
+size_t get_left_child_index(size_t i) {
+    return 2*i;
+}
+bool has_left_child(generic_array heap, size_t elem_index) {
+    return get_left_child_index(elem_index) <= heap.array_size;
+}
+size_t get_right_child_index(size_t i) {
+    return 2*i+1;
+}
+bool has_right_child(generic_array heap, size_t elem_index) {
+    return get_right_child_index(elem_index) <= heap.array_size;
+}
 generic_array make_array_copy(generic_array source) {
     size_t array_size = source.array_size;
     size_t unit_size = source.unit_size;
@@ -162,6 +177,18 @@ void swap_array_positions(generic_array array,
     memcpy(&array.pointer[j], aux, array.unit_size);
 }
 
+void heapify(generic_array heap, size_t index) {
+    size_t j = index;
+    while (2*j < heap.array_size) {
+
+    }
+}
+
+generic_array make_heap(generic_array from) {
+    generic_array heap = make_array_copy(from);
+
+    return heap;
+}
 
 /* ============================================ */
 
