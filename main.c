@@ -121,6 +121,22 @@ generic_array merge_sort(generic_array array,
                  comparator);
 }
 
+void write_to_file(char* file_name,
+                   generic_array array,
+                   char* (*to_string)(void *)) {
+    FILE* output;
+    output = fopen(file_name, "w");
+
+    size_t i;
+    for (i = 0;
+         i < array.array_size * array.unit_size;
+         i = i + array.unit_size)
+    {
+        fputs(to_string(&array.pointer[i]), output);
+    }
+    fclose(output);
+}
+
 typedef struct  {
     char *url;
     int amount;
@@ -149,7 +165,13 @@ entity make_entity(char* line) {
     return e;
 }
 
+char* entity_to_string(void* e) {
+    entity entity_e = *(entity*)e;
 
+    char *str = malloc(256*sizeof(char));
+    snprintf(str, 256, "%s %i\n", entity_e.url, entity_e.amount);
+    return str;
+}
 
 int main() {
     FILE* input = fopen("./input.txt", "r");
@@ -159,16 +181,15 @@ int main() {
     char line[256];
     size_t line_number = 0;
     while (fgets(line, 256, input)) {
-        if (line_number == 10) {
-
-        }
-
         entities_buffer[line_number] = make_entity(line);
         ++line_number;
     }
     generic_array a_e = {.pointer = &entities_buffer, .array_size=line_number, .unit_size=sizeof(entity)};
-    print_array(a_e, print_entity);
-    print_array(merge_sort(a_e, compare_entity), print_entity);
+    /* print_array(a_e, print_entity); */
+    write_to_file("output.txt",
+                  merge_sort(a_e, compare_entity),
+                  entity_to_string);
 
+    fclose(input);
     return 0;
 }
