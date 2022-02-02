@@ -25,7 +25,7 @@ void print_array(generic_array array, void (*print)(void *)) {
     size_t i;
     for (i = 0;
          i < (array.array_size-1);
-         i = i + array.unit_size)
+         ++i)
     {
         printf("[");
         print(get_unit(array, i));
@@ -33,7 +33,7 @@ void print_array(generic_array array, void (*print)(void *)) {
     }
 
     printf("[");
-    print(&array.pointer[i]);
+    print(get_unit(array, i));
     printf("]\n");
 }
 
@@ -127,6 +127,23 @@ void write_to_file(char* file_name,
         free(string);
     }
     fclose(output);
+}
+
+/* ============================================ */
+
+void print_pointer(void* p) {
+    printf("%p", p);
+}
+
+void print_int(void* i) {
+    int int_i = *(int*)i;
+    printf("%i", int_i);
+}
+
+bool compare_int(void* i, void* j) {
+    int int_i = *(int*)i;
+    int int_j = *(int*)j;
+    return int_i < int_j;
 }
 
 /* ============================================ */
@@ -230,23 +247,6 @@ generic_array make_heap(generic_array from, bool (*comparator)(void *, void *)) 
     }
 
     return heap;
-}
-
-/* ============================================ */
-
-void print_pointer(void* p) {
-    printf("%p", p);
-}
-
-void print_int(void* i) {
-    int int_i = *(int*)i;
-    printf("%i", int_i);
-}
-
-bool compare_int(void* i, void* j) {
-    int int_i = *(int*)i;
-    int int_j = *(int*)j;
-    return int_i < int_j;
 }
 
 /* ============================================ */
