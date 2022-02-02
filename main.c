@@ -12,8 +12,8 @@ typedef struct  {
 
 /* ============================================ */
 
-void* get_pointer_to_unit_at_position(generic_array array,
-                                      size_t i) {
+void* get_unit(generic_array array,
+               size_t i) {
     return &array.pointer[i * array.unit_size];
 }
 
@@ -28,7 +28,7 @@ void print_array(generic_array array, void (*print)(void *)) {
          i = i + array.unit_size)
     {
         printf("[");
-        print(get_pointer_to_unit_at_position(array, i));
+        print(get_unit(array, i));
         printf("] -> ");
     }
 
@@ -57,9 +57,9 @@ generic_array merge(generic_array array1,
          i < final_array_size;
          ++i)
     {
-        void* array1_head = get_pointer_to_unit_at_position(array1, array1_i);
-        void* array2_head = get_pointer_to_unit_at_position(array2, array2_i);
-        void* head = get_pointer_to_unit_at_position(final_array, i);
+        void* array1_head = get_unit(array1, array1_i);
+        void* array2_head = get_unit(array2, array2_i);
+        void* head = get_unit(final_array, i);
 
         if (array1_i == array1.array_size) {
             memcpy(head, array2_head, unit_size);
