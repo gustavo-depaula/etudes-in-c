@@ -164,7 +164,7 @@ bool compare_int(void* i, void* j) {
 /* ============================================ */
 
 size_t get_parent_index(size_t i) {
-    return i/2;
+    return (i-1)/2;
 }
 size_t get_left_child_index(size_t i) {
     return 2*i+1;
@@ -179,6 +179,9 @@ bool has_right_child(generic_array heap, size_t elem_index) {
     return get_right_child_index(elem_index) < heap.array_size;
 }
 
+void* get_parent(generic_array heap, size_t elem_index) {
+    return get_unit(heap, get_parent_index(elem_index));
+}
 void* get_left_child(generic_array heap, size_t elem_index) {
     return get_unit(heap, get_left_child_index(elem_index));
 }
@@ -267,7 +270,7 @@ size_t get_top_child_index(generic_array heap, size_t index, bool (*comparator)(
     return top_child_index;
 }
 
-void heapify(generic_array heap, size_t index, bool (*comparator)(void *, void *)) {
+void heapify_bottom_down(generic_array heap, size_t index, bool (*comparator)(void *, void *)) {
     size_t top_child_index = get_top_child_index(heap, index, comparator);
     if (top_child_index == 0) {
         return;
@@ -280,7 +283,22 @@ void heapify(generic_array heap, size_t index, bool (*comparator)(void *, void *
     }
 
     swap_array_positions(heap, index, top_child_index);
-    heapify(heap, top_child_index, comparator);
+    heapify_bottom_down(heap, top_child_index, comparator);
+}
+
+void heapify_bottom_up(Heap heap, size_t index) {
+    if (index == 0) {
+        return;
+    }
+
+    void* elem = get_unit(heap.array, index);
+    void* parent = get_parent(heap.array, index);
+    if (heap.comparator(parent, elem)) {
+        return;
+    }
+
+    swap_array_positions(heap.array, index, get_parent_index(index));
+    heapify_bottom_up(heap, get_parent_index(index));
 }
 
 Heap make_heap(generic_array from, bool (*comparator)(void *, void *)) {
@@ -289,9 +307,9 @@ Heap make_heap(generic_array from, bool (*comparator)(void *, void *)) {
     if (heap.array_size > 0) {
         size_t i;
         for (i = heap.array_size-1; i > 0; --i) {
-            heapify(heap, i, comparator);
+            heapify_bottom_down(heap, i, comparator);
         }
-        heapify(heap, 0, comparator);
+        heapify_bottom_down(heap, 0, comparator);
     }
 
     Heap* as_heap = (Heap*)&heap;
@@ -300,21 +318,40 @@ Heap make_heap(generic_array from, bool (*comparator)(void *, void *)) {
     return *as_heap;
 }
 
+void change_array_size(generic_array* array, size_t new_size) {
+    array->array_size = new_size;
+    array->pointer = realloc(array->pointer, new_size * array->unit_size);
+}
+
+void increase_array_size(generic_array* array) {
+    size_t new_array_size = array->array_size+1;
+    change_array_size(array, new_array_size);
+}
+void decrease_array_size(generic_array* array) {
+    size_t new_array_size = array->array_size-1;
+    change_array_size(array, new_array_size);
+}
+
 void* extract(Heap* heap) {
     generic_array heap_array = *(generic_array*)heap;
     void* extracted = get_unit_copy(heap_array, 0);
 
     void* rightMostElement = get_unit(heap_array, heap_array.array_size-1);
     assign_unit_to_position(heap_array, 0, rightMostElement);
-    heapify(heap_array, 0, heap->comparator);
-    --((generic_array*)heap)->array_size;
+    heapify_bottom_down(heap_array, 0, heap->comparator);
+
+    decrease_array_size((generic_array*)heap);
 
     return extracted;
 }
 
-/* void* insert(generic_array* heap, bool (*comparator)(void *, void *)) { */
+void insert(Heap* heap, void* unit) {
+    increase_array_size(&heap->array);
 
-/* } */
+    size_t lastPosition = (*heap).array.array_size-1;
+    assign_unit_to_position(heap->array, lastPosition, unit);
+    heapify_bottom_up(*heap, lastPosition);
+}
 
 /* ============================================ */
 
@@ -404,7 +441,7 @@ int main() {
     print_array(a_a, print_int);
     Heap heap = make_heap(a_a, compare_int);
     printf("\n\n\n");
-    print_heap(*(generic_array*)&heap, 0, print_int);
+    print_heap(heap.array, 0, print_int);
 
     printf("extracted root=");
     print_int(extract(&heap));
@@ -412,7 +449,14 @@ int main() {
 
     /* printf("size=%zu\n", heap.array_size); */
 
-    print_heap(*(generic_array*)&heap, 0, print_int);
+    print_heap(heap.array, 0, print_int);
+
+    int b = 0;
+    void* ptr = &b;
+    insert(&heap, ptr);
+
+    printf("\n");
+    print_heap(heap.array, 0, print_int);
 
     return 0;
 }
