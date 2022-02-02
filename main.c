@@ -7,9 +7,15 @@ typedef struct  {
     void* pointer;
     size_t array_size, unit_size;
     // need the unit size to iterate over the array
+    // size_t is a type guaranteed to hold any array index
 } generic_array;
 
 /* ============================================ */
+
+void* get_pointer_to_unit_at_position(generic_array array,
+                                      size_t i) {
+    return &array.pointer[i * array.unit_size];
+}
 
 void print_array(generic_array array, void (*print)(void *)) {
     if (array.array_size == 0) {
@@ -18,11 +24,11 @@ void print_array(generic_array array, void (*print)(void *)) {
 
     size_t i;
     for (i = 0;
-         i < (array.array_size-1) * array.unit_size;
+         i < (array.array_size-1);
          i = i + array.unit_size)
     {
         printf("[");
-        print(&array.pointer[i]);
+        print(get_pointer_to_unit_at_position(array, i));
         printf("] -> ");
     }
 
@@ -48,30 +54,31 @@ generic_array merge(generic_array array1,
     size_t array1_i = 0;
     size_t array2_i = 0;
     for (i = 0;
-         i < final_array_size * unit_size;
-         i = i + unit_size)
+         i < final_array_size;
+         ++i)
     {
-        void* array1_head = &array1.pointer[array1_i];
-        void* array2_head = &array2.pointer[array2_i];
+        void* array1_head = get_pointer_to_unit_at_position(array1, array1_i);
+        void* array2_head = get_pointer_to_unit_at_position(array2, array2_i);
+        void* head = get_pointer_to_unit_at_position(final_array, i);
 
-        if (array1_i == (array1.array_size * array1.unit_size)) {
-            memcpy((void*)(&pointer[i]), array2_head, unit_size);
-            array2_i += unit_size;
+        if (array1_i == array1.array_size) {
+            memcpy(head, array2_head, unit_size);
+            ++array2_i;
             continue;
         }
 
-        if (array2_i == (array2.array_size * array2.unit_size)) {
-            memcpy((void*)(&pointer[i]), array1_head, unit_size);
-            array1_i += unit_size;
+        if (array2_i == array2.array_size) {
+            memcpy(head, array1_head, unit_size);
+            ++array1_i;
             continue;
         }
 
         if (comparator(array1_head, array2_head)) {
-            memcpy((void*)(&pointer[i]), array1_head, unit_size);
-            array1_i += unit_size;
+            memcpy(head, array1_head, unit_size);
+            ++array1_i;
         } else {
-            memcpy((void*)(&pointer[i]), array2_head, unit_size);
-            array2_i += unit_size;
+            memcpy(head, array2_head, unit_size);
+            ++array2_i;
         }
     }
     return final_array;
