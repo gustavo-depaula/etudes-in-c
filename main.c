@@ -121,15 +121,55 @@ generic_array merge_sort(generic_array array,
                  comparator);
 }
 
+typedef struct  {
+    char *url;
+    int amount;
+    int tapeIdentifier;
+} entity;
+
+bool compare_entity(void* a, void* b) {
+    entity entity_a = *(entity*)a;
+    entity entity_b = *(entity*)b;
+    if (entity_a.amount == entity_b.amount) {
+        return strcmp(entity_a.url, entity_b.url) < 0;
+    }
+    return entity_a.amount > entity_b.amount;
+}
+
+void print_entity(void* a) {
+    entity entity_a = *(entity*)a;
+    printf("url=%s | amount=%i", entity_a.url, entity_a.amount);
+}
+
+entity make_entity(char* line) {
+    char* url = strtok(strdup(line), " ");
+    char* amount_str = strtok(NULL, " ");
+
+    entity e = {.url = url, .amount = atoi(amount_str)};
+    return e;
+}
+
 int main() {
-    int a[] = {5,2,7,1,4,0};
-    generic_array a_a = {.pointer = &a, .array_size = 6, .unit_size = sizeof(int)};
+    entity a = make_entity("google.com 59");
+    print_entity((void*)&a);
+    /* entity b = {.amount = 3, .url = "aaazon.com"}; */
+    /* entity x = {.amount = 3, .url = "amazon.com"}; */
+    /* entity a = {.amount = 3, .url = "google.com"}; */
+    /* entity c = {.amount = 1, .url = "bing.com"}; */
+    /* entity d = {.amount = 4, .url = "msft.com"}; */
+    /* entity entities[] = {a,b,c,d,x}; */
+    /* generic_array a_e = {.pointer = &entities, .array_size=5, .unit_size = sizeof(entity)}; */
+    /* print_array(a_e, print_entity); */
+
+
+    /* int a[] = {5,2,7,1,4,0}; */
+    /* generic_array a_a = {.pointer = &a, .array_size = 6, .unit_size = sizeof(int)}; */
 
     /* int b[] = {2,4,6,8,10}; */
     /* generic_array a_b = {.pointer = &b, .array_size = 5, .unit_size = sizeof(int)}; */
 
-    generic_array merged = merge_sort(a_a, compare_int);
-    print_array(merged, print_int);
-    print_array(merged, print_pointer);
+    /* generic_array merged = merge_sort(a_e, compare_entity); */
+    /* print_array(merged, print_entity); */
+    /* print_array(merged, print_pointer); */
     return 0;
 }
