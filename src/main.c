@@ -90,11 +90,7 @@ size_t split_input_file_into_sorted_tapes(char* filename, size_t max_entities_pe
     return tape_id+1;
 }
 
-/* ============================================ */
-
-int main() {
-    size_t number_of_tapes = split_input_file_into_sorted_tapes("./input.txt", 10);
-
+void merge_tapes_into_output_file(size_t number_of_tapes) {
     FILE* tapes[number_of_tapes];
     FILE* output = fopen("output.txt", "w");
 
@@ -139,6 +135,13 @@ int main() {
         fclose(tapes[i]);
     }
     fclose(output);
+}
+
+/* ============================================ */
+
+int main() {
+    size_t number_of_tapes = split_input_file_into_sorted_tapes("./input.txt", 10);
+    merge_tapes_into_output_file(number_of_tapes);
 
     return 0;
 }
