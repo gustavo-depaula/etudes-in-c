@@ -131,6 +131,36 @@ void write_to_file(char* file_name,
 
 /* ============================================ */
 
+generic_array make_array_copy(generic_array source) {
+    size_t array_size = source.array_size;
+    size_t unit_size = source.unit_size;
+    void* pointer = malloc(array_size * unit_size);
+    generic_array copy = {
+      .pointer = pointer,
+      .array_size = array_size,
+      .unit_size = unit_size
+    };
+
+    size_t i;
+    for (i = 0;
+         i < array_size * unit_size;
+         i = i + unit_size)
+    {
+        void* elem = &source.pointer[i];
+        memcpy(&pointer[i], elem, unit_size);
+    }
+
+    return copy;
+}
+
+void swap_array_positions(generic_array array,
+                          size_t i,
+                          size_t j) {
+    void* aux = malloc(array.unit_size);
+    memcpy(aux, &array.pointer[i], array.unit_size);
+    memcpy(&array.pointer[i], &array.pointer[j], array.unit_size);
+    memcpy(&array.pointer[j], aux, array.unit_size);
+}
 
 
 /* ============================================ */
