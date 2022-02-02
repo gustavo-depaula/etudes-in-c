@@ -152,16 +152,16 @@ size_t get_parent_index(size_t i) {
     return i/2;
 }
 size_t get_left_child_index(size_t i) {
-    return 2*i;
-}
-bool has_left_child(generic_array heap, size_t elem_index) {
-    return get_left_child_index(elem_index) <= heap.array_size;
-}
-size_t get_right_child_index(size_t i) {
     return 2*i+1;
 }
+bool has_left_child(generic_array heap, size_t elem_index) {
+    return get_left_child_index(elem_index) < heap.array_size;
+}
+size_t get_right_child_index(size_t i) {
+    return 2*i+2;
+}
 bool has_right_child(generic_array heap, size_t elem_index) {
-    return get_right_child_index(elem_index) <= heap.array_size;
+    return get_right_child_index(elem_index) < heap.array_size;
 }
 
 void* get_left_child(generic_array heap, size_t elem_index) {
@@ -169,6 +169,31 @@ void* get_left_child(generic_array heap, size_t elem_index) {
 }
 void* get_right_child(generic_array heap, size_t elem_index) {
     return get_unit(heap, get_right_child_index(elem_index));
+}
+
+void print_heap(generic_array heap, size_t index, void (*print)(void *)) {
+    if (index >= heap.array_size) {
+        return;
+    }
+
+    printf("[");
+    print(get_unit(heap, index));
+    printf("] -> [");
+    if (has_left_child(heap, index)) {
+        print(get_left_child(heap, index));
+        printf(", ");
+        if (has_right_child(heap, index)) {
+            print(get_right_child(heap, index));
+        } else {
+            printf("(empty)");
+        }
+    } else {
+        printf("no children!");
+    }
+    printf("]\n");
+
+    print_heap(heap, get_left_child_index(index), print);
+    print_heap(heap, get_right_child_index(index), print);
 }
 
 generic_array make_array_copy(generic_array source) {
@@ -197,9 +222,9 @@ void swap_array_positions(generic_array array,
                           size_t i,
                           size_t j) {
     void* aux = malloc(array.unit_size);
-    memcpy(aux, &array.pointer[i], array.unit_size);
-    memcpy(&array.pointer[i], &array.pointer[j], array.unit_size);
-    memcpy(&array.pointer[j], aux, array.unit_size);
+    memcpy(aux, get_unit(array, i), array.unit_size);
+    memcpy(get_unit(array, i), get_unit(array, j), array.unit_size);
+    memcpy(get_unit(array, j), aux, array.unit_size);
 }
 
 size_t get_top_child_index(generic_array heap, size_t index, bool (*comparator)(void *, void *)) {
@@ -212,7 +237,7 @@ size_t get_top_child_index(generic_array heap, size_t index, bool (*comparator)(
 
     if (has_right_child(heap, index)) {
         void* right_child = get_right_child(heap, index);
-        if (comparator(left_child, right_child)) {
+        if (comparator(right_child, left_child)) {
             top_child_index = get_right_child_index(index);
         }
     }
@@ -221,6 +246,9 @@ size_t get_top_child_index(generic_array heap, size_t index, bool (*comparator)(
 }
 
 void heapify(generic_array heap, size_t index, bool (*comparator)(void *, void *)) {
+    printf("\nheapify:\n");
+    print_heap(heap, index, print_int);
+    /* print_array(heap, print_int); */
     size_t top_child_index = get_top_child_index(heap, index, comparator);
     if (top_child_index == 0) {
         return;
@@ -228,11 +256,17 @@ void heapify(generic_array heap, size_t index, bool (*comparator)(void *, void *
 
     void* elem = get_unit(heap, index);
     void* top_child = get_unit(heap, top_child_index);
+    printf("elem=");
+    print_int(elem);
+    printf("  top_child= ");
+    print_int(top_child);
+    printf("\n");
     if (comparator(elem, top_child)) {
         return;
     }
 
     swap_array_positions(heap, index, top_child_index);
+    printf("swapped! pos=%zu %zu\n", index, top_child_index);
     heapify(heap, top_child_index, comparator);
 }
 
@@ -240,10 +274,11 @@ generic_array make_heap(generic_array from, bool (*comparator)(void *, void *)) 
     generic_array heap = make_array_copy(from);
 
     if (heap.array_size > 0) {
-        size_t i = 0;
-        for (i = heap.array_size; i >= 0; --i) {
+        size_t i;
+        for (i = heap.array_size-1; i > 0; --i) {
             heapify(heap, i, comparator);
         }
+        heapify(heap, 0, comparator);
     }
 
     return heap;
@@ -327,6 +362,17 @@ void split_input_file_into_sorted_tapes(char* filename, size_t max_entities_per_
 /* ============================================ */
 
 int main() {
-    split_input_file_into_sorted_tapes("./input.txt", 10);
+    /* split_input_file_into_sorted_tapes("./input.txt", 10); */
+
+    int a[] = {5,2,7,1,4,0};
+    generic_array a_a = {.pointer = &a, .array_size = 6, .unit_size = sizeof(int)};
+
+    /* print_array(a_a, print_int); */
+    /* swap_array_positions(a_a, 0, 2); */
+    print_array(a_a, print_int);
+    generic_array heap = make_heap(a_a, compare_int);
+    printf("\n\n\n");
+    print_heap(heap, 0, print_int);
+
     return 0;
 }
