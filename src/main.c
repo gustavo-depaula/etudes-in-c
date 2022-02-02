@@ -7,25 +7,6 @@
 #include "merge_sort.h"
 #include "heaps.h"
 
-/* ============================================ */
-
-void write_to_file(char* file_name,
-                   generic_array array,
-                   char* (*to_string)(void *)) {
-    FILE* output;
-    output = fopen(file_name, "w");
-
-    size_t i;
-    for (i = 0;
-         i < array.array_size * array.unit_size;
-         i = i + array.unit_size)
-    {
-        char* string = to_string(&array.pointer[i]);
-        fputs(string, output);
-        free(string);
-    }
-    fclose(output);
-}
 
 /* ============================================ */
 
@@ -91,7 +72,7 @@ char* get_tape_filename(size_t tape_id) {
 void flush_entities_to_file(generic_array entities, size_t tape_id) {
     generic_array merged = merge_sort(entities, compare_entity);
     char* tape_filename = get_tape_filename(tape_id);
-    write_to_file(tape_filename,
+    write_array_to_file(tape_filename,
                   merged,
                   entity_to_string);
     free(tape_filename);

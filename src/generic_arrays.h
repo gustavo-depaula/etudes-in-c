@@ -30,5 +30,6 @@ void change_array_size(generic_array* array, size_t new_size);
 void increase_array_size(generic_array* array);
 void decrease_array_size(generic_array* array);
 generic_array make_array_copy(generic_array source);
+void write_array_to_file(char* file_name, generic_array array, char* (*to_string)(void *));
 
 #endif // GENERIC_ARRAYS_H_

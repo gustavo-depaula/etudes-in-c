@@ -88,3 +88,21 @@ generic_array make_array_copy(generic_array source) {
 
     return copy;
 }
+
+void write_array_to_file(char* file_name,
+                   generic_array array,
+                   char* (*to_string)(void *)) {
+    FILE* output;
+    output = fopen(file_name, "w");
+
+    size_t i;
+    for (i = 0;
+         i < array.array_size;
+         ++i)
+    {
+        char* string = to_string(get_unit(array, i));
+        fputs(string, output);
+        free(string);
+    }
+    fclose(output);
+}
