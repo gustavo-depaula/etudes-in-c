@@ -3,6 +3,9 @@
 #include <string.h>
 #include <stdbool.h>
 
+
+typedef bool (*comparator_func)(void *, void *);
+
 typedef struct  {
     void* pointer;
     size_t array_size, unit_size;
@@ -10,11 +13,23 @@ typedef struct  {
     // size_t is a type guaranteed to hold any array index
 } generic_array;
 
+typedef struct {
+    generic_array array;
+    comparator_func comparator;
+} Heap;
+
 /* ============================================ */
 
 void* get_unit(generic_array array,
                size_t i) {
     return &array.pointer[i * array.unit_size];
+}
+void* get_unit_copy(generic_array array,
+                    size_t i) {
+    void* unit = get_unit(array, i);
+    void* copy = malloc(array.unit_size);
+    memcpy(copy, unit, array.unit_size);
+    return copy;
 }
 
 void print_array(generic_array array, void (*print)(void *)) {
@@ -218,13 +233,20 @@ generic_array make_array_copy(generic_array source) {
     return copy;
 }
 
+void assign_unit_to_position(generic_array array,
+                             size_t index,
+                             void* unit) {
+    memcpy(get_unit(array, index), unit, array.unit_size);
+}
+
 void swap_array_positions(generic_array array,
                           size_t i,
                           size_t j) {
     void* aux = malloc(array.unit_size);
     memcpy(aux, get_unit(array, i), array.unit_size);
-    memcpy(get_unit(array, i), get_unit(array, j), array.unit_size);
-    memcpy(get_unit(array, j), aux, array.unit_size);
+    assign_unit_to_position(array, i, get_unit(array, j));
+    assign_unit_to_position(array, j, aux);
+    free(aux);
 }
 
 size_t get_top_child_index(generic_array heap, size_t index, bool (*comparator)(void *, void *)) {
@@ -246,9 +268,6 @@ size_t get_top_child_index(generic_array heap, size_t index, bool (*comparator)(
 }
 
 void heapify(generic_array heap, size_t index, bool (*comparator)(void *, void *)) {
-    printf("\nheapify:\n");
-    print_heap(heap, index, print_int);
-    /* print_array(heap, print_int); */
     size_t top_child_index = get_top_child_index(heap, index, comparator);
     if (top_child_index == 0) {
         return;
@@ -256,21 +275,15 @@ void heapify(generic_array heap, size_t index, bool (*comparator)(void *, void *
 
     void* elem = get_unit(heap, index);
     void* top_child = get_unit(heap, top_child_index);
-    printf("elem=");
-    print_int(elem);
-    printf("  top_child= ");
-    print_int(top_child);
-    printf("\n");
     if (comparator(elem, top_child)) {
         return;
     }
 
     swap_array_positions(heap, index, top_child_index);
-    printf("swapped! pos=%zu %zu\n", index, top_child_index);
     heapify(heap, top_child_index, comparator);
 }
 
-generic_array make_heap(generic_array from, bool (*comparator)(void *, void *)) {
+Heap make_heap(generic_array from, bool (*comparator)(void *, void *)) {
     generic_array heap = make_array_copy(from);
 
     if (heap.array_size > 0) {
@@ -281,8 +294,27 @@ generic_array make_heap(generic_array from, bool (*comparator)(void *, void *)) 
         heapify(heap, 0, comparator);
     }
 
-    return heap;
+    Heap* as_heap = (Heap*)&heap;
+    as_heap->comparator = comparator;
+
+    return *as_heap;
 }
+
+void* extract(Heap* heap) {
+    generic_array heap_array = *(generic_array*)heap;
+    void* extracted = get_unit_copy(heap_array, 0);
+
+    void* rightMostElement = get_unit(heap_array, heap_array.array_size-1);
+    assign_unit_to_position(heap_array, 0, rightMostElement);
+    heapify(heap_array, 0, heap->comparator);
+    --((generic_array*)heap)->array_size;
+
+    return extracted;
+}
+
+/* void* insert(generic_array* heap, bool (*comparator)(void *, void *)) { */
+
+/* } */
 
 /* ============================================ */
 
@@ -370,9 +402,17 @@ int main() {
     /* print_array(a_a, print_int); */
     /* swap_array_positions(a_a, 0, 2); */
     print_array(a_a, print_int);
-    generic_array heap = make_heap(a_a, compare_int);
+    Heap heap = make_heap(a_a, compare_int);
     printf("\n\n\n");
-    print_heap(heap, 0, print_int);
+    print_heap(*(generic_array*)&heap, 0, print_int);
+
+    printf("extracted root=");
+    print_int(extract(&heap));
+    printf("\n");
+
+    /* printf("size=%zu\n", heap.array_size); */
+
+    print_heap(*(generic_array*)&heap, 0, print_int);
 
     return 0;
 }
