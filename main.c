@@ -334,6 +334,9 @@ void decrease_array_size(generic_array* array) {
 
 void* extract(Heap* heap) {
     generic_array heap_array = *(generic_array*)heap;
+    if (heap_array.array_size == 0) {
+        return NULL;
+    }
     void* extracted = get_unit_copy(heap_array, 0);
 
     void* rightMostElement = get_unit(heap_array, heap_array.array_size-1);
@@ -358,7 +361,7 @@ void insert(Heap* heap, void* unit) {
 typedef struct  {
     char *url;
     int amount;
-    int tapeIdentifier;
+    int tape_id;
 } entity;
 
 bool compare_entity(void* a, void* b) {
@@ -391,17 +394,23 @@ char* entity_to_string(void* e) {
     return str;
 }
 
-void flush_entities_to_file(generic_array entities, size_t tape_id) {
-    char tape_filename[32];
+char* get_tape_filename(size_t tape_id) {
+    char* tape_filename = malloc(32*sizeof(char));
     snprintf(tape_filename, 32, "tapes/tape-%zu.txt", tape_id);
+    return tape_filename;
+}
+
+void flush_entities_to_file(generic_array entities, size_t tape_id) {
     generic_array merged = merge_sort(entities, compare_entity);
+    char* tape_filename = get_tape_filename(tape_id);
     write_to_file(tape_filename,
                   merged,
                   entity_to_string);
+    free(tape_filename);
     free(merged.pointer);
 }
 
-void split_input_file_into_sorted_tapes(char* filename, size_t max_entities_per_tape) {
+size_t split_input_file_into_sorted_tapes(char* filename, size_t max_entities_per_tape) {
     FILE* input = fopen(filename, "r");
 
     entity entities_buffer[max_entities_per_tape];
@@ -426,37 +435,58 @@ void split_input_file_into_sorted_tapes(char* filename, size_t max_entities_per_
     flush_entities_to_file(entities, tape_id);
 
     fclose(input);
+    return tape_id+1;
 }
 
 /* ============================================ */
 
 int main() {
-    /* split_input_file_into_sorted_tapes("./input.txt", 10); */
+    size_t number_of_tapes = split_input_file_into_sorted_tapes("./input.txt", 10);
 
-    int a[] = {5,2,7,1,4,0};
-    generic_array a_a = {.pointer = &a, .array_size = 6, .unit_size = sizeof(int)};
+    FILE* tapes[number_of_tapes];
+    FILE* output = fopen("output.txt", "w");
 
-    /* print_array(a_a, print_int); */
-    /* swap_array_positions(a_a, 0, 2); */
-    print_array(a_a, print_int);
-    Heap heap = make_heap(a_a, compare_int);
-    printf("\n\n\n");
-    print_heap(heap.array, 0, print_int);
+    size_t i;
+    for (i = 0; i < number_of_tapes; ++i) {
+        char* tape_filename = get_tape_filename(i);
+        tapes[i] = fopen(tape_filename, "r");
+        free(tape_filename);
+    }
 
-    printf("extracted root=");
-    print_int(extract(&heap));
-    printf("\n");
+    char line[256];
+    entity top_entities[number_of_tapes];
+    for (i = 0; i < number_of_tapes; ++i) {
+        fgets(line, 256, tapes[i]);
+        top_entities[i] = make_entity(line);
+        top_entities[i].tape_id = i;
+    }
 
-    /* printf("size=%zu\n", heap.array_size); */
+    generic_array entities = {.pointer = &top_entities,
+                              .array_size=number_of_tapes,
+                              .unit_size=sizeof(entity)};
 
-    print_heap(heap.array, 0, print_int);
+    Heap heap = make_heap(entities, compare_entity);
+    printf("\n\n");
+    print_heap(heap.array, 0, print_entity);
 
-    int b = 0;
-    void* ptr = &b;
-    insert(&heap, ptr);
+    entity* extracted = extract(&heap);
+    printf("entities:\n\n");
+    while (extracted != NULL) {
+        fputs(entity_to_string(extracted), output);
 
-    printf("\n");
-    print_heap(heap.array, 0, print_int);
+        if (fgets(line, 256, tapes[extracted->tape_id]) != NULL) {
+            entity e = make_entity(line);
+            e.tape_id = extracted->tape_id;
+            insert(&heap, &e);
+        }
+        extracted = extract(&heap);
+    }
+
+    // close files
+    for (i = 0; i < number_of_tapes; ++i) {
+        fclose(tapes[i]);
+    }
+    fclose(output);
 
     return 0;
 }
