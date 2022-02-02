@@ -132,7 +132,9 @@ void write_to_file(char* file_name,
          i < array.array_size * array.unit_size;
          i = i + array.unit_size)
     {
-        fputs(to_string(&array.pointer[i]), output);
+        char* string = to_string(&array.pointer[i]);
+        fputs(string, output);
+        free(string);
     }
     fclose(output);
 }
@@ -173,23 +175,44 @@ char* entity_to_string(void* e) {
     return str;
 }
 
-int main() {
-    FILE* input = fopen("./input.txt", "r");
-    /* print_array(a_e, print_entity); */
+void flush_entities_to_file(generic_array entities, size_t tape_id) {
+    char tape_filename[32];
+    snprintf(tape_filename, 32, "tapes/tape-%zu.txt", tape_id);
+    generic_array merged = merge_sort(entities, compare_entity);
+    write_to_file(tape_filename,
+                  merged,
+                  entity_to_string);
+    free(merged.pointer);
+}
 
-    entity entities_buffer[256];
+void split_input_file_into_sorted_tapes(char* filename, size_t max_entities_per_tape) {
+    FILE* input = fopen(filename, "r");
+
+    entity entities_buffer[max_entities_per_tape];
     char line[256];
+    size_t tape_id = 0;
     size_t line_number = 0;
     while (fgets(line, 256, input)) {
+        if (line_number == max_entities_per_tape) {
+            generic_array entities = {.pointer = &entities_buffer,
+                                      .array_size=line_number,
+                                      .unit_size=sizeof(entity)};
+            flush_entities_to_file(entities, tape_id);
+            ++tape_id;
+            line_number = 0;
+        }
         entities_buffer[line_number] = make_entity(line);
         ++line_number;
     }
-    generic_array a_e = {.pointer = &entities_buffer, .array_size=line_number, .unit_size=sizeof(entity)};
-    /* print_array(a_e, print_entity); */
-    write_to_file("output.txt",
-                  merge_sort(a_e, compare_entity),
-                  entity_to_string);
+    generic_array entities = {.pointer = &entities_buffer,
+                              .array_size=line_number,
+                              .unit_size=sizeof(entity)};
+    flush_entities_to_file(entities, tape_id);
 
     fclose(input);
+}
+
+int main() {
+    split_input_file_into_sorted_tapes("./input.txt", 10);
     return 0;
 }
