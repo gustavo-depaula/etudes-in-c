@@ -66,3 +66,25 @@ void decrease_array_size(generic_array* array) {
     size_t new_array_size = array->array_size-1;
     change_array_size(array, new_array_size);
 }
+
+generic_array make_array_copy(generic_array source) {
+    size_t array_size = source.array_size;
+    size_t unit_size = source.unit_size;
+    void* pointer = malloc(array_size * unit_size);
+    generic_array copy = {
+      .pointer = pointer,
+      .array_size = array_size,
+      .unit_size = unit_size
+    };
+
+    size_t i;
+    for (i = 0;
+         i < array_size * unit_size;
+         i = i + unit_size)
+    {
+        void* elem = &source.pointer[i];
+        memcpy(&pointer[i], elem, unit_size);
+    }
+
+    return copy;
+}

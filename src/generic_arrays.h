@@ -29,5 +29,6 @@ void swap_array_positions(generic_array array, size_t i,size_t j);
 void change_array_size(generic_array* array, size_t new_size);
 void increase_array_size(generic_array* array);
 void decrease_array_size(generic_array* array);
+generic_array make_array_copy(generic_array source);
 
 #endif // GENERIC_ARRAYS_H_
