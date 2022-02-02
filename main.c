@@ -9,14 +9,7 @@ typedef struct  {
     // need the unit size to iterate over the array
 } generic_array;
 
-void print_pointer(void* p) {
-    printf("%p", p);
-}
-
-void print_int(void* i) {
-    int int_i = *(int*)i;
-    printf("%i", int_i);
-}
+/* ============================================ */
 
 void print_array(generic_array array, void (*print)(void *)) {
     if (array.array_size == 0) {
@@ -36,16 +29,6 @@ void print_array(generic_array array, void (*print)(void *)) {
     printf("[");
     print(&array.pointer[i]);
     printf("]\n");
-}
-
-bool compare_int(void* i, void* j) {
-    int int_i = *(int*)i;
-    int int_j = *(int*)j;
-    return int_i < int_j;
-}
-
-void assign_int(void* dest, void* src) {
-    *(int*)dest = *(int*)src;
 }
 
 generic_array merge(generic_array array1,
@@ -139,6 +122,29 @@ void write_to_file(char* file_name,
     fclose(output);
 }
 
+/* ============================================ */
+
+
+
+/* ============================================ */
+
+void print_pointer(void* p) {
+    printf("%p", p);
+}
+
+void print_int(void* i) {
+    int int_i = *(int*)i;
+    printf("%i", int_i);
+}
+
+bool compare_int(void* i, void* j) {
+    int int_i = *(int*)i;
+    int int_j = *(int*)j;
+    return int_i < int_j;
+}
+
+/* ============================================ */
+
 typedef struct  {
     char *url;
     int amount;
@@ -211,6 +217,8 @@ void split_input_file_into_sorted_tapes(char* filename, size_t max_entities_per_
 
     fclose(input);
 }
+
+/* ============================================ */
 
 int main() {
     split_input_file_into_sorted_tapes("./input.txt", 10);
