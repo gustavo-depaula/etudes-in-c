@@ -121,91 +121,12 @@ generic_array merge_sort(generic_array array,
                  comparator);
 }
 
-int callee(void* a, void* b) {
-    int int_a = *(int*)a;
-    int int_b = *(int*)b;
-    printf("%i %i %i\n", int_a, int_b, int_a > int_b);
-    return int_a > int_b;
-}
-
-int caller(void* a, void* b, int (*fun)(void*, void*)) {
-    return fun(a, b);
-}
-
-
 int main() {
-
-
-    int x;
-    int y;
-    int z;
-
-    /* void* ptr; */
-    /* int* ptr; */
-
-    /* ptr = &x; */
-    /* x = 5; */
-
-    /* printf("%i\n", *ptr); */
-    /* printf("%p %p %p\n", &x, &y, &z); */
-    /* printf("%zu\n", sizeof(int)); */
-    /* printf("%p %p %p %p\n", &x, &y, &z, ptr); */
-    /* printf("%i\n", *(int*)ptr); */
-    /* printf("%p %p\n", &caller, &callee); */
-    /* printf("%p %p\n", caller, callee); */
-
-
-    /* int* a = &(int){4}; */
-    /* int* b = &(int){3}; */
-    /* printf("%i\n", caller(a, b, callee)); */
-
-
-    /* a[1] => *(a+1); */
-    /* 1[a] => *(1+a); */
-
     int a[] = {5,2,7,1,4,0};
     generic_array a_a = {.pointer = &a, .array_size = 6, .unit_size = sizeof(int)};
 
     /* int b[] = {2,4,6,8,10}; */
     /* generic_array a_b = {.pointer = &b, .array_size = 5, .unit_size = sizeof(int)}; */
-    /* printf("%i", *(a+1)); */
-    /* printf("%i", 1[a]); */
-
-
-    /* printf("%p\n", a); */
-    /* printf("%p\n", &a[0]); */
-    /* printf("%p\n", &a[1]); */
-    /* printf("%p\n", &a[1]); */
-
-
-    /* printf("%i\n", a[0]); */
-    /* void* ptr = &a[1]; */
-    /* printf("%p\n", ptr); */
-
-    /* int int_a = *(int*)ptr; */
-    /* printf("%i\n\n\n\n", int_a); */
-    /* printf("%zu\n\n\n", sizeof(int)); */
-
-    /* print_array(a_a, print_int); */
-
-
-    /* print_array(a_a, print_pointer); */
-    /* print_array(a_b, print_pointer); */
-
-    /* void** pointer = malloc(5*sizeof(int)); */
-    /* void* ptr = &a[0]; */
-    /* void** ptr2 = malloc(sizeof(int)); */
-    /* ptr2[0] = &ptr; */
-    /* printf("%i\n", &ptr); */
-    /* printf("%i\n", *(int*)ptr); */
-    /* printf("%p\n", ptr); */
-    /* printf("%p\n", ptr2); */
-    /* printf("%i\n", *(int*)ptr2); */
-    /* memcpy(pointer[0], ptr, sizeof(int)); */
-
-    /* generic_array merged = merge(a_a, a_b, compare_int); */
-    /* print_array(merged, print_int); */
-    /* print_array(merged, print_pointer); */
 
     generic_array merged = merge_sort(a_a, compare_int);
     print_array(merged, print_int);
