@@ -149,27 +149,26 @@ entity make_entity(char* line) {
     return e;
 }
 
+
+
 int main() {
-    entity a = make_entity("google.com 59");
-    print_entity((void*)&a);
-    /* entity b = {.amount = 3, .url = "aaazon.com"}; */
-    /* entity x = {.amount = 3, .url = "amazon.com"}; */
-    /* entity a = {.amount = 3, .url = "google.com"}; */
-    /* entity c = {.amount = 1, .url = "bing.com"}; */
-    /* entity d = {.amount = 4, .url = "msft.com"}; */
-    /* entity entities[] = {a,b,c,d,x}; */
-    /* generic_array a_e = {.pointer = &entities, .array_size=5, .unit_size = sizeof(entity)}; */
+    FILE* input = fopen("./input.txt", "r");
     /* print_array(a_e, print_entity); */
 
+    entity entities_buffer[256];
+    char line[256];
+    size_t line_number = 0;
+    while (fgets(line, 256, input)) {
+        if (line_number == 10) {
 
-    /* int a[] = {5,2,7,1,4,0}; */
-    /* generic_array a_a = {.pointer = &a, .array_size = 6, .unit_size = sizeof(int)}; */
+        }
 
-    /* int b[] = {2,4,6,8,10}; */
-    /* generic_array a_b = {.pointer = &b, .array_size = 5, .unit_size = sizeof(int)}; */
+        entities_buffer[line_number] = make_entity(line);
+        ++line_number;
+    }
+    generic_array a_e = {.pointer = &entities_buffer, .array_size=line_number, .unit_size=sizeof(entity)};
+    print_array(a_e, print_entity);
+    print_array(merge_sort(a_e, compare_entity), print_entity);
 
-    /* generic_array merged = merge_sort(a_e, compare_entity); */
-    /* print_array(merged, print_entity); */
-    /* print_array(merged, print_pointer); */
     return 0;
 }
