@@ -35,11 +35,11 @@ bool compare_entities(void* a, void* b) {
 }
 
 int main() {
-    external_sorting("./input.txt",
-                     "./output.txt",
+    external_sorting("./cases/external-sort-urls/input.txt",
+                     "./cases/external-sort-urls/output.txt",
                      10,
                      compare_entities,
-                     "tapes/tape-%zu.txt");
+                     "./cases/external-sort-urls/tapes/tape-%zu.txt");
 
     return 0;
 }

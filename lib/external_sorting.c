@@ -9,8 +9,8 @@
 #include "external_sorting.h"
 
 char* get_tape_filename(size_t tape_id, char* tape_filename_format) {
-    char* tape_filename = malloc(32*sizeof(char));
-    snprintf(tape_filename, 32, tape_filename_format, tape_id);
+    char* tape_filename = malloc(128*sizeof(char));
+    snprintf(tape_filename, 128, tape_filename_format, tape_id);
     return tape_filename;
 }
 
