@@ -3,10 +3,10 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "generic_arrays.h"
-#include "merge_sort.h"
-#include "heaps.h"
-#include "external_sorting.h"
+#include "../../lib/generic_arrays.h"
+#include "../../lib/merge_sort.h"
+#include "../../lib/heaps.h"
+#include "../../lib/external_sorting.h"
 
 
 /* ============================================ */

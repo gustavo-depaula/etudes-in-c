@@ -1,7 +1,3 @@
-build:
-	gcc src/*.c -o exec
-
-run-only:
+external-sort-urls:
+	gcc cases/external-sort-urls/main.c lib/*.c -o exec
 	./exec
-
-run: build run-only
