@@ -14,3 +14,8 @@ For the past week (at the time of writing this), I have fallen in love with gene
 Sadly (or gladly), my university course doesn't use "raw" C in any subjects (afaik). So these explorations have been for fun and knowledge only. The caveat is that some of the use cases I wrote are based on stolen assignments from friends' subjects in their universities.
 
 Feel free to explore, review, use, and leave suggestions on any code in this repository!
+
+Quick explanation:
+
+- In `lib/` there are reusable data structures and algorithms
+- In `cases/` there are specific applicatoins that use these A&DSs
